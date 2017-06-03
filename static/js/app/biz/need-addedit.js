@@ -42,6 +42,14 @@ $(function() {
         type: "hidden",
         required: true,
     }, {
+        title: '需求类型',
+        field: 'type',
+        type: "select",
+        key: "demand_type",
+        required: true,
+        readonly: view,
+        formatter: Dict.getNameForList("demand_type")
+    }, {
         title: '开始时间',
         field: 'startDatetime',
         type: "datetime",
@@ -104,7 +112,7 @@ $(function() {
         title: '详述',
         field: 'detail',
         type: "textarea",
-        // normalArea: true,
+        normalArea: true,
         required: true,
         readonly: view,
     }];

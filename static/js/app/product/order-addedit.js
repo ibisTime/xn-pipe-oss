@@ -37,6 +37,10 @@ $(function() {
         formatter: dateTimeFormat,
         readonly: view,
     }, {
+        field: 'amount1',
+        title: '人民币总额',
+        formatter: moneyFormat,
+    }, {
         title: '积分总额',
         field: 'amount3',
         formatter: moneyFormat,
@@ -75,11 +79,17 @@ $(function() {
                 return data.quantity
             }
         }, {
-            field: 'price3',
-            title: '积分价格',
+            field: 'price1',
+            title: '人民币价格',
             formatter: function(v, data) {
-                return moneyFormat(data.price3);
-            }
+                return moneyFormat(data.price1);
+                 }
+        }, {
+        field: 'price3',
+        title: '积分价格',
+        formatter: function(v, data) {
+            return moneyFormat(data.price3);
+        }
         }]
     }, {
         field: 'logisticsCode',

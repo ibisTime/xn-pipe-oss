@@ -21,6 +21,12 @@ $(function() {
         hidden: true,
         required: true,
     }, {
+        field: 'price1',
+        title: '人民币价',
+        amount: true,
+        formatter: moneyFormat,
+        required: true,
+    }, {
         field: 'price3',
         title: '积分价',
         amount: true,
@@ -51,7 +57,7 @@ $(function() {
         confirm("确认上架？").then(function() {
             var data = $('#jsForm').serializeObject();
             data.code = code;
-            data.price1 = "0";
+            // data.price1 = "0";
 
             reqApi({
                 code: '808013',

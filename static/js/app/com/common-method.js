@@ -35,24 +35,25 @@ function dateTimeFormat(date) {
     if (date == '' || typeof(date) == 'undefined') {
         return '-';
     }
-    var format = "yyyy-MM-dd HH:mm:ss";
-    date = date.replace(/(12:\d\d:\d\d\s)AM$/, "$1PM");
+    var format = "yyyy-MM-dd hh:mm:ss";
     date = new Date(date);
+
     var o = {
-        'M+': date.getMonth() + 1, //month
-        'd+': date.getDate(), //day
-        'H+': date.getHours(), //hour
-        'm+': date.getMinutes(), //minute
-        's+': date.getSeconds(), //second
-        'q+': Math.floor((date.getMonth() + 3) / 3), //quarter
-        'S': date.getMilliseconds() //millisecond
+        "M+": date.getMonth() + 1, //month
+        "d+": date.getDate(), //day
+        "h+": date.getHours(), //hour
+        "m+": date.getMinutes(), //minute
+        "s+": date.getSeconds(), //second
+        "q+": Math.floor((date.getMonth() + 3) / 3), //quarter
+        "S": date.getMilliseconds() //millisecond
     };
     if (/(y+)/.test(format)) {
-        format = format.replace(RegExp.$1, (date.getFullYear() + '').substr(4 - RegExp.$1.length));
+        format = format.replace(RegExp.$1, (date.getFullYear() + "").substr(4 - RegExp.$1.length));
     }
+
     for (var k in o) {
-        if (new RegExp('(' + k + ')').test(format)) {
-            format = format.replace(RegExp.$1, RegExp.$1.length == 1 ? o[k] : ('00' + o[k]).substr(('' + o[k]).length));
+        if (new RegExp("(" + k + ")").test(format)) {
+            format = format.replace(RegExp.$1, RegExp.$1.length == 1 ? o[k] : ("00" + o[k]).substr(("" + o[k]).length));
         }
     }
     return format;
@@ -83,7 +84,7 @@ function dateTimeFormat(date) {
 function moneyFormat(money, format) {
     var flag = true;
     if (isNaN(money)) {
-        return '0.00';
+        return '-';
     }
     if (money < 0) {
         money = -1 * money;
@@ -193,6 +194,16 @@ function RateFormatByLargeHundred(rate) {
 }
 
 /**
+ * 保留金额小数后2位,0.111 = 0.12
+ */
+//num是要处理的数字  v为要保留的小数位数
+function moneyFormatdecimal(num) {
+    var vv = Math.pow(10, 2);
+    return Math.ceil(num * vv) / vv;
+}
+
+
+/**
  * 显示遮罩
  */
 function maskPop() {
@@ -221,7 +232,7 @@ function getQueryString(name) {
     if (r != null) {
         return decodeURIComponent(r[2]);
     }
-    return null;
+    return '';
 }
 
 /**
@@ -315,7 +326,16 @@ $.fn.serializeObject = function() {
             if (!o[this.name].push) {
                 o[this.name] = [o[this.name]];
             }
-            o[this.name].push(this.value || '');
+            var flag = 1;
+            for (var i = 0; i < o[this.name].length; i++) {
+                if (o[this.name][i] == this.value) {
+                    flag = 0;
+                    break;
+                }
+            }
+            if (flag) {
+                o[this.name].push(this.value || '');
+            }
         } else {
             var value = this.value || '';
             if ($('#' + this.name).parent('li').attr('type') == 'amount') {
@@ -336,14 +356,17 @@ $.fn.serializeObject = function() {
 };
 
 $.fn.renderDropdown = function(data, keyName, valueName, defaultOption, filter) {
-    var value, listCode, params, dict, filter = filter || '';
+    var value, listCode, params, dict, filter = filter || '',
+        beforeData, keyCode1;
     if ($.isPlainObject(data)) {
         value = data.value;
         listCode = data.listCode;
+        keyCode1 = data.keyCode1;
         params = data.params || {};
         keyName = data.keyName;
         valueName = data.valueName;
         defaultOption = data.defaultOption;
+        beforeData = data.beforeData;
         dict = data.dict;
     }
     if (listCode) {
@@ -356,9 +379,16 @@ $.fn.renderDropdown = function(data, keyName, valueName, defaultOption, filter) 
         });
     }
     data = (data.data && data.data.list) || data.data || data || [];
+    beforeData && (data = beforeData(data));
+
     if (dict) {
         dict.forEach(function(item) {
-            var dictData = Dict.getName(item[1]);
+            if (keyCode1) {
+                var dictData = Dict.getName2(item[1], keyCode1);
+            } else {
+                var dictData = Dict.getName(item[1]);
+            }
+
             data.forEach(function(i) {
                 i[item[0] + 'Name'] = Dict.findName(dictData, i[item[0]]);
             });
@@ -372,14 +402,11 @@ $.fn.renderDropdown = function(data, keyName, valueName, defaultOption, filter) 
     for (var i = 0; i < data.length; i++) {
         if (filter && filters.indexOf(data[i][keyName]) > -1) {
             html += "<option value='" + data[i][keyName] + "'>" + (data[i][valueName] || valueName.temp(data[i])) + "</option>";
-        } else if (!filter && data[i][keyName]) {
+        } else if (!filter) {
             html += "<option value='" + data[i][keyName] + "'>" + (data[i][valueName] || valueName.temp(data[i])) + "</option>";
         }
     }
     this.html(html);
-    if (value) {
-        this.val(value);
-    }
     return data;
 };
 
@@ -500,16 +527,19 @@ $(function() {
     setTimeout(function() {
         chosen();
         // 面包屑
-        var topTitle = $('.nav .selected h2', window.parent.frames[0].document).text();
-        var leftFirstTitle = $('.left-menu .active', window.parent.frames[1].document).parent().prev().find('.title').text();
-        var leftSecondTitle = $('.left-menu .active', window.parent.frames[1].document).text();
-        var html = '<li>' + topTitle + '</li><li>' + leftFirstTitle + '</li><li>' + leftSecondTitle + '</li>';
-        var BtnTitle = localStorage.getItem('syj-btn');
-        localStorage.setItem('syj-btn', '');
-        if (BtnTitle) {
-            html += '<li>' + BtnTitle + '</li>';
+        if (window.parent.frames[0]) {
+            var topTitle = $('.nav .selected h2', window.parent.frames[0].document).text();
+            var leftFirstTitle = $('.left-menu .active', window.parent.frames[1].document).parent().prev().find('.title').text();
+            var leftSecondTitle = $('.left-menu .active', window.parent.frames[1].document).text();
+            var html = '<li>' + topTitle + '</li><li>' + leftFirstTitle + '</li><li>' + leftSecondTitle + '</li>';
+            var BtnTitle = localStorage.getItem('syj-btn');
+            localStorage.setItem('syj-btn', '');
+            if (BtnTitle) {
+                html += '<li>' + BtnTitle + '</li>';
+            }
+            $('.place ul').html(html);
         }
-        $('.place ul').html(html);
+
     }, 1);
 
 });
@@ -592,7 +622,7 @@ function buildList(options) {
     if (options.type != 'o2m') {
         showPermissionControl();
     }
-
+    var searchs = JSON.parse(sessionStorage.getItem('listSearchs') || '{}')[location.pathname];
     options.router = options.router || /.*\/([^\/]*)\.html/.exec(location.href)[1];
 
     var html = '<ul>';
@@ -707,6 +737,41 @@ function buildList(options) {
                     return d[v];
                 };
             })(dataDict);
+        } else if (item.pageCode1) {
+            var pageParams = {
+                start: 1,
+                limit: 10
+            };
+            $.extend(pageParams, item.params || {});
+            data = $('#' + item.field).renderDropdown($.extend({
+                listCode: item.pageCode1,
+                keyCode1: item.keyCode1,
+                params: pageParams,
+                keyName: item.keyName,
+                valueName: item.valueName,
+                dict: item.dict
+            }, (item.defaultOption ? { defaultOption: '<option value="0">' + item.defaultOption + '</option>' } : {})));
+            $('#' + item.field)[0].pageOptions = {
+                pageCode: item.pageCode1,
+                keyCode1: item.keyCode1,
+                keyName: item.keyName,
+                valueName: item.valueName,
+                dict: item.dict,
+                searchName: item.searchName
+            };
+            $('#' + item.field)[0].pageParams = pageParams;
+            $('#' + item.field)[0].pageParams.start += 1;
+        }
+
+        if (item.onChange) {
+
+            (function(i, data) {
+                $('#' + i.field).on('change', function(e) {
+                    var record = Dict.findObj(data, this.value, i.keyName);
+                    i.onChange(this.value, record);
+                });
+            })(item, data);
+
         }
         if (item.value) {
             $('#' + item.field).val(item.value);
@@ -722,6 +787,7 @@ function buildList(options) {
     });
 
     $('#searchBtn').click(function() {
+        updateListSearch();
         $('#tableList').bootstrapTable('refresh', { url: $('#tableList').bootstrapTable('getOptions').url });
     });
 
@@ -760,7 +826,10 @@ function buildList(options) {
         }
         window.location.href = options.router + "_addedit.html?code=" + (selRecords[0].code || selRecords[0].id) + urlParamsStr + codeParams;
     });
-
+    var searchValue;
+    for (searchValue in searchs) {
+        $('#' + searchValue).val(searchs[searchValue]);
+    }
     $('#deleteBtn').click(function() {
         var selRecords = $('#tableList').bootstrapTable('getSelections');
         if (selRecords.length <= 0) {
@@ -1029,6 +1098,10 @@ function buildDetail(options) {
             rules[item.field]['amount'] = item['amount'];
         }
 
+        if (item['minAmount']) {
+            rules[item.field]['minAmount'] = item['minAmount'];
+        }
+
         if (item['tm']) {
             rules[item.field]['tm'] = item['tm'];
         }
@@ -1146,6 +1219,24 @@ function buildDetail(options) {
     } else {
         $('#form-info').append(html);
     }
+
+    $(document).on('mouseenter', '.field-help', function() {
+        if (!$(this).attr('data-show')) {
+            var help = $(this).attr('data-help');
+            var me = this;
+            $(me).attr('data-show', '1');
+            var d = dialog({
+                align: 'top',
+                content: help,
+                quickClose: true,
+                onclose: function() {
+                    $(me).attr('data-show', '');
+                }
+            });
+            d.show(this);
+        }
+    });
+
     if (options.view) {
         $('#subBtn').remove();
     }
@@ -1164,11 +1255,8 @@ function buildDetail(options) {
                 var values = [];
                 var imgs = $(el).find('.img-ctn');
                 imgs.each(function(index, img) {
-                    values.push($(img).attr('data-src') || $(img).find('img').attr('src'));
+                    values.push($(img).attr('data-src') || $(img).find('img').attr('data-src'));
                 });
-                // if (item.type == 'img' && item.passValue) {
-                //     data[item.field] = $('#' + item.field).find('option:selected').html();
-                // }
                 data[el.id] = values.join('||');
             });
             if ($('#jsForm').find('#province')[0]) {
@@ -1195,29 +1283,37 @@ function buildDetail(options) {
                 if (item.type == 'select' && item.passValue) {
                     data[item.field] = $('#' + item.field).find('option:selected').html();
                 }
-                // if (item.type == 'img' && item.passValue) {
-                //     data[item.field] = $('#' + item.field).find('option:selected').html();
-                // }
-                if (item.type == "checkbox") {
-                    data[item.field] = $.isArray(data[item.field]) ? data[item.field].join(",") : data[item.field];
-                }
             }
             data['id'] = data['code'];
             if (options.beforeSubmit) {
-                data = options.beforeSubmit(data)
-                if (!data) {
+                if (!options.beforeSubmit(data)) {
                     return;
                 }
             }
-            reqApi({
-                code: code ? options.editCode : options.addCode,
-                json: data
-            }).done(function(data) {
-                sucDetail();
-            });
+
+            var request = function() {
+                reqApi({
+                    code: code ? options.editCode : options.addCode,
+                    json: data
+                }).done(function(data) {
+                    sucDetail();
+                });
+            };
+
+            if (options.beforeSubmitAsync) {
+                options.beforeSubmitAsync.callback = request;
+                options.beforeSubmitAsync(data);
+            } else {
+                request();
+            }
+
         }
     });
-    $("#jsForm").validate({ 'rules': rules });
+    if (options.container) {
+        options.container.closest('form').validate({ 'rules': rules });
+    } else {
+        $("#jsForm").validate({ 'rules': rules });
+    }
 
     for (var i = 0, len = dropDownList.length; i < len; i++) {
         var item = dropDownList[i];
@@ -1260,6 +1356,7 @@ function buildDetail(options) {
             $.extend(pageParams, item.params || {});
             data = $('#' + item.field).renderDropdown($.extend({
                 listCode: item.pageCode,
+                keyCode1: item.keyCode1,
                 params: pageParams,
                 keyName: item.keyName,
                 valueName: item.valueName,
@@ -1267,6 +1364,7 @@ function buildDetail(options) {
             }, (item.defaultOption ? { defaultOption: '<option value="0">' + item.defaultOption + '</option>' } : {})));
             $('#' + item.field)[0].pageOptions = {
                 pageCode: item.pageCode,
+                keyCode1: item.keyCode1,
                 keyName: item.keyName,
                 valueName: item.valueName,
                 dict: item.dict,
@@ -1313,17 +1411,12 @@ function buildDetail(options) {
 
     for (var i = 0, len = dateTimeList.length; i < len; i++) {
         var item = dateTimeList[i];
-        if (item.dateOption) {
-            laydate(item.dateOption);
-        } else {
-            laydate({
-                elem: '#' + item.field,
-                min: item.minDate ? item.minDate : '',
-                istime: item.type == 'datetime',
-                format: item.type == 'datetime' ? 'YYYY-MM-DD hh:mm:ss' : 'YYYY-MM-DD'
-            });
-        }
-
+        laydate({
+            elem: '#' + item.field,
+            min: item.minDate ? item.minDate : '',
+            istime: item.type == 'datetime',
+            format: item.type == 'datetime' ? 'YYYY-MM-DD hh:mm:ss' : 'YYYY-MM-DD'
+        });
     }
 
     $("#city-group").citySelect && $("#city-group").citySelect({
@@ -1341,6 +1434,16 @@ function buildDetail(options) {
             (function(i) {
                 $('#' + i.field).on('blur', function(e) {
                     i.onBlur(this.value);
+                });
+            })(item);
+
+        }
+
+        if (item.onKeyup) {
+
+            (function(i) {
+                $('#' + i.field).on('keyup', function(e) {
+                    i.onKeyup(this.value);
                 });
             })(item);
 
@@ -1430,7 +1533,8 @@ function buildDetail(options) {
                         if (item.pageCode) {
                             $('#' + item.field).html('<table id="' + item.field + 'List"></table>');
                             var searchParams = {};
-                            searchParams[item['key']] = item.o2mvalue || $('#code').val();
+                            //                          searchParams[item['key']] = item.o2mvalue || $('#code').val();
+                            searchParams = item.o2mvalue || $('#code').val();
                             item.searchParams1 && $.extend(searchParams, item.searchParams1);
                             var options1 = {
                                 columns: item.columns,
@@ -1669,8 +1773,13 @@ function buildDetail(options) {
                         sp.length && sp.forEach(function(item) {
                             var suffix = item.slice(item.lastIndexOf('.') + 1);
                             var src = (item.indexOf('http://') > -1 ? item : (OSS.picBaseUrl + '/' + item));
-                            var src1 = (item.indexOf('http://') > -1 ? item.substring(item.lastIndexOf("/") + 1) : item);
-                            var name = src1.substring(0, src1.lastIndexOf("_")) + "." + suffix;
+                            //                          var src1 = (item.indexOf('http://') > -1 ? item.substring(item.lastIndexOf("/") + 1) : item);
+                            var src1 = item;
+                            if (item.indexOf('http://') > -1) {
+                                var name = src.substring(src.lastIndexOf("/") + 1);
+                            } else {
+                                var name = src1.substring(0, src1.lastIndexOf("_")) + "." + suffix;
+                            }
                             if (isDocOrAviOrZip(suffix)) {
                                 imgsHtml += '<div class="img-ctn" data-src="' + src1 + '" style="display: inline-block;position: relative;">' +
                                     '<div class="center-img-wrap">' +
@@ -1937,6 +2046,17 @@ $.fn.highlight = function(type) {
         that.parent().addClass('swing');
     }, 1);
 };
+
+function setImgDisabled(el) {
+    var count = el.find('.img-ctn').length;
+    if (count >= 1) {
+        el.prev().addClass('disabled');
+        el.prev().find('input').prop('disabled', true);
+    } else {
+        el.prev().removeClass('disabled');
+        el.prev().find('input').prop('disabled', false);
+    }
+}
 
 function uploadInit() {
     // this 即 editor 对象
@@ -2527,6 +2647,7 @@ function buildDetail1(options) {
         laydate({
             elem: '#' + item.field + "-model",
             min: item.minDate ? item.minDate : '',
+            istoday: true,
             istime: item.type == 'datetime',
             format: item.type == 'datetime' ? 'YYYY-MM-DD hh:mm:ss' : 'YYYY-MM-DD'
         });
@@ -3301,3 +3422,11 @@ $(function() {
         }, +OSS.userValidTime * 60 * 1000);
     });
 });
+
+function updateListSearch() {
+    var searchs = JSON.parse(sessionStorage.getItem('listSearchs') || '{}');
+    var pathName = location.pathname;
+    var params = $('.search-form').serializeObject();
+    searchs[pathName] = params;
+    sessionStorage.setItem('listSearchs', JSON.stringify(searchs));
+}

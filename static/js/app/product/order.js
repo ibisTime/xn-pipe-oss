@@ -15,6 +15,10 @@ $(function() {
         formatter: Dict.getNameForList("order_status", "808907"),
         search: true,
     }, {
+        field: 'amount1',
+        title: '人民币总额',
+        formatter: moneyFormat,
+    }, {
         field: 'amount3',
         title: '积分总额',
         formatter: moneyFormat,

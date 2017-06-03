@@ -59,6 +59,12 @@ $(function() {
         formatter: moneyFormat,
         readonly: view
     }, {
+        field: 'price1',
+        title: '人民币价',
+        amount: true,
+        formatter: moneyFormat,
+        readonly: view
+    },{
         field: 'price3',
         title: '积分价',
         amount: true,
