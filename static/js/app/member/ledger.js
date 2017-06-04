@@ -59,7 +59,7 @@ $(function() {
         pageCode: "802520",
         searchParams: {
             accountNumber: accountCode,
-            // status: 'effect'
+            companyCode: OSS.company
         }
     });
 

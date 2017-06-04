@@ -47,6 +47,7 @@ $(function() {
         pageCode: '802520',
         searchParams: {
             userId: OSS.SYS_USER,
+            companyCode: OSS.company
         }
     });
 

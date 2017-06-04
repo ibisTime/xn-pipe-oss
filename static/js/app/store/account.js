@@ -22,8 +22,20 @@ $(function() {
         dw.showModal();
         buildDetail({
             fields: [{
+                field: "fromUserId",
+                value: getUserId(),
+                type: 'hidden'
+            }, {
+                field: "fromCurrency",
+                value: "JF",
+                type: 'hidden'
+            }, {
+                field: "toCurrency",
+                value: "JF",
+                type: 'hidden'
+            }, {
                 title: '发放用户',
-                field: 'mobile',
+                field: 'toUserId',
                 type: 'select',
                 listCode: "805055",
                 params: {
@@ -31,7 +43,7 @@ $(function() {
                     kind: "f1",
                     updater: ""
                 },
-                keyName: 'mobile',
+                keyName: 'userId',
                 valueName: '{{nickname.DATA}}--{{mobile.DATA}}',
                 searchName: "mobile",
                 required: true
@@ -48,12 +60,9 @@ $(function() {
                 title: '发放',
                 handler: function() {
                     if ($('#popForm').valid()) {
-
                         var data = $('#popForm').serializeObject();
-                        data.storeOwner = getUserId();
-                        data.currency = "JF";
                         reqApi({
-                            code: '802400',
+                            code: '802413',
                             json: data
                         }).done(function(data) {
                             sucList();
