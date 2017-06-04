@@ -48,6 +48,12 @@ $(function() {
         key: "demand_order_status",
         formatter: Dict.getNameForList("demand_order_status")
     }, {
+        title: '施工图',
+        field: 'pic',
+        type: 'img',
+        required: true,
+        readonly: view
+    }, {
         title: "评价水电工",
         field: "evaluate",
         required: true,

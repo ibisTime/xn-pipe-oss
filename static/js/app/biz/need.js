@@ -148,7 +148,7 @@ $(function() {
             return;
         }
 
-        if (selRecords[0].status != 1) {
+        if ( !(selRecords[0].status == 0 || selRecords[0].status == 1 || selRecords[0].status == 2 || selRecords[0].status == 5)) {
             toastr.info("不是可以派单的状态");
             return;
         }

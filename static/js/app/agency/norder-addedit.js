@@ -95,8 +95,13 @@ $(function() {
             title: "备注",
             field: "remark",
             readonly: true,
+        }, {
+            title: '施工图',
+            field: 'pic',
+            type: 'img',
+            required: true,
+            readonly: view
         }
-
     ];
 
 

@@ -12,85 +12,85 @@ $(function() {
 
     });
 
-    $('#accoutSaleBtn').click(function() {
-        var selRecords = $('#tableList').bootstrapTable('getSelections');
-        var dw = dialog({
-            content: '<form class="pop-form" id="popForm" novalidate="novalidate">' +
-                '<ul class="form-info" id="formContainer"></ul>' +
-                '</form>'
-        });
-
-        dw.showModal();
-        buildDetail({
-            fields: [{
-                title: '菜狗币',
-                field: 'rollbackNote',
-                readonly: view
-            }, {
-                title: '商家',
-                field: 'mobile',
-                required: true
-            }, {
-                title: '额度',
-                field: 'amount',
-                required: true
-            }],
-            container: $('#formContainer'),
-            buttons: [{
-                title: '通过',
-                handler: function() {
-                    if ($('#popForm').valid()) {
-                        var selRecords = $('#tableList').bootstrapTable('getSelections');
-                        var code = [];
-                        // selRecords.forEach(function(i) {
-                        //     code.push(i.code);
-                        // });
-                        var data = $('#popForm').serializeObject();
-                        data.codeList = code;
-                        data.rollbackResult = '1';
-                        data.rollbackUser = getUserName();
-                        data.order = data.code;
-                        reqApi({
-                            code: '802402',
-                            json: data
-                        }).done(function(data) {
-                            sucList();
-                            dw.close().remove();
-                        });
-                    }
-                }
-            }, {
-                title: '不通过',
-                handler: function() {
-                    if ($('#popForm').valid()) {
-                        var selRecords = $('#tableList').bootstrapTable('getSelections');
-                        var code = [];
-                        selRecords.forEach(function(i) {
-                            code.push(i.code);
-                        });
-                        var data = $('#popForm').serializeObject();
-                        data.codeList = code;
-                        data.rollbackResult = '0';
-                        data.rollbackUser = getUserName();
-                        data.order = data.code;
-                        reqApi({
-                            code: '802402',
-                            json: data
-                        }).done(function(data) {
-                            sucList();
-                            dw.close().remove();
-                        });
-                    }
-                }
-            }, {
-                title: '取消',
-                handler: function() {
-                    dw.close().remove();
-                }
-            }]
-        });
-        dw.__center();
-    });
+    // $('#accoutSaleBtn').click(function() {
+    //     var selRecords = $('#tableList').bootstrapTable('getSelections');
+    //     var dw = dialog({
+    //         content: '<form class="pop-form" id="popForm" novalidate="novalidate">' +
+    //             '<ul class="form-info" id="formContainer"></ul>' +
+    //             '</form>'
+    //     });
+    //
+    //     dw.showModal();
+    //     buildDetail({
+    //         fields: [{
+    //             title: '菜狗币',
+    //             field: 'rollbackNote',
+    //             readonly: view
+    //         }, {
+    //             title: '商家',
+    //             field: 'mobile',
+    //             required: true
+    //         }, {
+    //             title: '额度',
+    //             field: 'amount',
+    //             required: true
+    //         }],
+    //         container: $('#formContainer'),
+    //         buttons: [{
+    //             title: '通过',
+    //             handler: function() {
+    //                 if ($('#popForm').valid()) {
+    //                     var selRecords = $('#tableList').bootstrapTable('getSelections');
+    //                     var code = [];
+    //                     // selRecords.forEach(function(i) {
+    //                     //     code.push(i.code);
+    //                     // });
+    //                     var data = $('#popForm').serializeObject();
+    //                     data.codeList = code;
+    //                     data.rollbackResult = '1';
+    //                     data.rollbackUser = getUserName();
+    //                     data.order = data.code;
+    //                     reqApi({
+    //                         code: '802402',
+    //                         json: data
+    //                     }).done(function(data) {
+    //                         sucList();
+    //                         dw.close().remove();
+    //                     });
+    //                 }
+    //             }
+    //         }, {
+    //             title: '不通过',
+    //             handler: function() {
+    //                 if ($('#popForm').valid()) {
+    //                     var selRecords = $('#tableList').bootstrapTable('getSelections');
+    //                     var code = [];
+    //                     selRecords.forEach(function(i) {
+    //                         code.push(i.code);
+    //                     });
+    //                     var data = $('#popForm').serializeObject();
+    //                     data.codeList = code;
+    //                     data.rollbackResult = '0';
+    //                     data.rollbackUser = getUserName();
+    //                     data.order = data.code;
+    //                     reqApi({
+    //                         code: '802402',
+    //                         json: data
+    //                     }).done(function(data) {
+    //                         sucList();
+    //                         dw.close().remove();
+    //                     });
+    //                 }
+    //             }
+    //         }, {
+    //             title: '取消',
+    //             handler: function() {
+    //                 dw.close().remove();
+    //             }
+    //         }]
+    //     });
+    //     dw.__center();
+    // });
 
     $('#accoutGrantBtn').click(function() {
         var selRecords = $('#tableList').bootstrapTable('getSelections');
@@ -103,6 +103,18 @@ $(function() {
         dw.showModal();
         buildDetail({
             fields: [{
+                field: "fromUserId",
+                value: getUserId(),
+                type: 'hidden'
+            }, {
+                field: "fromCurrency",
+                value: "JF",
+                type: 'hidden'
+            }, {
+                field: "toCurrency",
+                value: "JF",
+                type: 'hidden'
+            }, {
                 title: '商家',
                 field: 'toUserId',
                 type: 'select',
@@ -124,34 +136,15 @@ $(function() {
             }],
             container: $('#formContainer'),
             buttons: [{
-                title: '通过',
+                title: '发放',
                 handler: function() {
                     if ($('#popForm').valid()) {
                         var selRecords = $('#tableList').bootstrapTable('getSelections');
 
                         var data = $('#popForm').serializeObject();
-                        data.fromUserId = getUserId();
-                        data.currency = 'JF';
 
                         reqApi({
-                            code: '802402',
-                            json: data
-                        }).done(function(data) {
-                            sucList();
-                            dw.close().remove();
-                        });
-                    }
-                }
-            }, {
-                title: '不通过',
-                handler: function() {
-                    if ($('#popForm').valid()) {
-                        var selRecords = $('#tableList').bootstrapTable('getSelections');
-                        var data = $('#popForm').serializeObject();
-                        data.fromUserId = getUserId();
-                        data.currency = 'JF';
-                        reqApi({
-                            code: '802402',
+                            code: '802413',
                             json: data
                         }).done(function(data) {
                             sucList();
