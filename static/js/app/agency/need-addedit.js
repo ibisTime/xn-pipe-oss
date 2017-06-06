@@ -20,6 +20,13 @@ $(function() {
         type: "hidden",
         required: true,
     }, {
+        title: '需求类型',
+        field: 'type',
+        type: "select",
+        key: "demand_type",
+        readonly: view,
+        required: true
+    }, {
         title: '开始时间',
         field: 'startDatetime',
         type: "datetime",

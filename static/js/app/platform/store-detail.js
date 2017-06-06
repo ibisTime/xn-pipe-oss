@@ -126,20 +126,22 @@ $(function() {
                 "0": "否",
         },
         required: true,
-    }, {
-        field: 'rate2',
-        title: '使用积分比例',
-            formatter: function(v, data) {
-                return (v * 100) + "%"
-            },
+    }
+    // , {
+    //     field: 'rate2',
+    //     title: '使用积分比例',
+    //         formatter: function(v, data) {
+    //             return (v * 100) + "%"
+    //         },
 
-        }, {
-            field: 'rate3',
-            title: '返点比例',
-            formatter: function(v, data) {
-                return (v * 100) + "%"
-            },
-        }, {
+    //     }, {
+    //         field: 'rate3',
+    //         title: '返点比例',
+    //         formatter: function(v, data) {
+    //             return (v * 100) + "%"
+    //         },
+    //     }
+        , {
             field: 'remark',
             title: '备注',
             readonly: view

@@ -7,6 +7,13 @@ $(function() {
         title: '',
         checkbox: true
     }, {
+        title: '需求类型',
+        field: 'type',
+        type: "select",
+        key: "demand_type",
+        search: true,
+        formatter: Dict.getNameForList("demand_type")
+    }, {
         title: '经销商名称',
         field: 'name',
         formatter: function(v, data) {
