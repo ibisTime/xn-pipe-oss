@@ -48,7 +48,7 @@ $(function() {
         key: "demand_type",
         required: true,
         readonly: view,
-        formatter: Dict.getNameForList("demand_type")
+        // formatter: Dict.getNameForList("demand_type")
     }, {
         title: '开始时间',
         field: 'startDatetime',

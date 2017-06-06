@@ -16,6 +16,8 @@ fis.match('::package', {
 
 fis.media("prod").match('*.{js,css}', {
     useHash: true
+}).match('config.js', {
+    useHash: false
 });
 
 fis.media("prod").match("**.js", {
@@ -23,7 +25,8 @@ fis.media("prod").match("**.js", {
 });
 
 fis.media("prod").match("config.js", {
-    optimizer: null
+    optimizer: null,
+    packTo: '/config/config.js'
 });
 
 fis.media("prod").match("**.css", {
